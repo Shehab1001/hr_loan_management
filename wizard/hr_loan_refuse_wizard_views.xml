@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hr_loan_refuse_wizard_form" model="ir.ui.view">
+        <field name="name">hr.loan.refuse.wizard.form</field>
+        <field name="model">hr.loan.refuse.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Refuse Loan Request">
+                <group>
+                    <field name="loan_id" readonly="1"/>
+                    <field name="refuse_reason" placeholder="Please provide a reason for refusing this loan request..."/>
+                </group>
+                <footer>
+                    <button name="action_refuse" type="object"
+                        string="Refuse Loan" class="btn-danger"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

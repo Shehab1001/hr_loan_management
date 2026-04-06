@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ══════════════════════════════════════════════
+         HR LOAN — Form View
+    ══════════════════════════════════════════════ -->
+    <record id="view_hr_loan_form" model="ir.ui.view">
+        <field name="name">hr.loan.form</field>
+        <field name="model">hr.loan</field>
+        <field name="arch" type="xml">
+            <form string="Loan Request">
+                <header>
+                    <button name="action_confirm" type="object" string="Submit for Approval"
+                        class="oe_highlight"
+                        invisible="state != 'draft'"/>
+                    <button name="action_validate1" type="object" string="Approve (HR)"
+                        class="oe_highlight"
+                        groups="hr_loan_management.group_hr_loan_manager"
+                        invisible="state != 'confirm'"/>
+                    <button name="action_validate" type="object" string="Approve &amp; Disburse"
+                        class="oe_highlight"
+                        groups="hr_loan_management.group_hr_loan_finance"
+                        invisible="state != 'validate1'"/>
+                    <button name="action_refuse" type="object" string="Refuse"
+                        groups="hr_loan_management.group_hr_loan_manager"
+                        invisible="state not in ('confirm', 'validate1')"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                        invisible="state in ('validate', 'refuse', 'cancel')"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft"
+                        invisible="state not in ('cancel', 'refuse')"/>
+                    <button name="action_print_loan" type="object" string="Print"
+                        invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="draft,confirm,validate1,validate"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_installments" type="object"
+                            class="oe_stat_button" icon="fa-list"
+                            invisible="installment_count == 0">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="paid_installment_count"/>/<field name="installment_count"/>
+                                </span>
+                                <span class="o_stat_text">Installments</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Request Details">
+                            <field name="loan_type"/>
+                            <field name="employee_id"
+                                readonly="state not in ('draft',)"/>
+                            <field name="department_id"/>
+                            <field name="job_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Loan Details">
+                            <field name="loan_amount"
+                                readonly="state not in ('draft',)"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="installment"
+                                readonly="state not in ('draft',)"/>
+                            <field name="installment_amount"/>
+                            <field name="payment_date"
+                                readonly="state not in ('draft',)"/>
+                            <field name="date_request"/>
+                        </group>
+                    </group>
+
+                    <group string="Approval &amp; Disbursement"
+                        invisible="state == 'draft'">
+                        <group>
+                            <field name="approved_by"/>
+                            <field name="date_approved"/>
+                        </group>
+                        <group>
+                            <field name="date_disbursed"/>
+                            <field name="refused_by" invisible="state != 'refuse'"/>
+                        </group>
+                    </group>
+
+                    <!-- Summary Bar -->
+                    <group string="Repayment Summary"
+                        invisible="state not in ('validate', 'refuse')">
+                        <group>
+                            <field name="total_paid"/>
+                            <field name="total_remaining"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Repayment Schedule" name="schedule">
+                            <field name="loan_lines" readonly="state != 'validate'"
+                                widget="one2many_list">
+                                <tree decoration-success="paid == True"
+                                      decoration-muted="paid == False and date &lt; today"
+                                      editable="bottom">
+                                    <field name="date"/>
+                                    <field name="amount"/>
+                                    <field name="paid" widget="toggle_button"/>
+                                    <field name="paid_date"/>
+                                    <field name="payslip_id"/>
+                                    <field name="note"/>
+                                    <button name="action_mark_paid" type="object"
+                                        string="Mark Paid" icon="fa-check"
+                                        invisible="paid == True"
+                                        groups="hr_loan_management.group_hr_loan_manager"/>
+                                    <button name="action_mark_unpaid" type="object"
+                                        string="Undo" icon="fa-undo"
+                                        invisible="paid == False"
+                                        groups="hr_loan_management.group_hr_loan_manager"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Explain the purpose of this loan or any special terms..."/>
+                        </page>
+                        <page string="Refusal Reason" name="refuse"
+                            invisible="state != 'refuse'">
+                            <field name="refuse_reason" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════
+         HR LOAN — Tree View
+    ══════════════════════════════════════════════ -->
+    <record id="view_hr_loan_tree" model="ir.ui.view">
+        <field name="name">hr.loan.tree</field>
+        <field name="model">hr.loan</field>
+        <field name="arch" type="xml">
+            <tree string="Loan Requests"
+                decoration-info="state == 'confirm'"
+                decoration-warning="state == 'validate1'"
+                decoration-success="state == 'validate'"
+                decoration-danger="state == 'refuse'"
+                decoration-muted="state in ('cancel', 'draft')">
+                <field name="name"/>
+                <field name="loan_type"/>
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="loan_amount"/>
+                <field name="installment"/>
+                <field name="installment_amount"/>
+                <field name="total_remaining"/>
+                <field name="date_request"/>
+                <field name="payment_date"/>
+                <field name="state" widget="badge"
+                    decoration-info="state == 'confirm'"
+                    decoration-warning="state == 'validate1'"
+                    decoration-success="state == 'validate'"
+                    decoration-danger="state == 'refuse'"/>
+                <field name="currency_id" column_invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════
+         HR LOAN — Search View
+    ══════════════════════════════════════════════ -->
+    <record id="view_hr_loan_search" model="ir.ui.view">
+        <field name="name">hr.loan.search</field>
+        <field name="model">hr.loan</field>
+        <field name="arch" type="xml">
+            <search string="Search Loans">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <separator/>
+                <filter name="filter_draft" string="Draft" domain="[('state','=','draft')]"/>
+                <filter name="filter_confirm" string="Waiting Approval" domain="[('state','=','confirm')]"/>
+                <filter name="filter_validate1" string="HR Approved" domain="[('state','=','validate1')]"/>
+                <filter name="filter_validate" string="Active Loans" domain="[('state','=','validate')]"/>
+                <filter name="filter_refuse" string="Refused" domain="[('state','=','refuse')]"/>
+                <separator/>
+                <filter name="filter_loan" string="Loans" domain="[('loan_type','=','loan')]"/>
+                <filter name="filter_advance" string="Advance Salary" domain="[('loan_type','=','advance')]"/>
+                <separator/>
+                <filter name="filter_my_loans" string="My Loans"
+                    domain="[('employee_id.user_id','=',uid)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_employee" string="Employee"
+                        context="{'group_by': 'employee_id'}"/>
+                    <filter name="group_department" string="Department"
+                        context="{'group_by': 'department_id'}"/>
+                    <filter name="group_state" string="Status"
+                        context="{'group_by': 'state'}"/>
+                    <filter name="group_type" string="Type"
+                        context="{'group_by': 'loan_type'}"/>
+                    <filter name="group_month" string="Request Month"
+                        context="{'group_by': 'date_request:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════
+         HR LOAN — Kanban View
+    ══════════════════════════════════════════════ -->
+    <record id="view_hr_loan_kanban" model="ir.ui.view">
+        <field name="name">hr.loan.kanban</field>
+        <field name="model">hr.loan</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="loan_amount"/>
+                <field name="total_remaining"/>
+                <field name="state"/>
+                <field name="loan_type"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="oe_kanban_details">
+                                <strong>
+                                    <field name="name"/>
+                                </strong>
+                                <div>
+                                    <i class="fa fa-user"/> <field name="employee_id"/>
+                                </div>
+                                <div>
+                                    <span class="badge bg-info">
+                                        <field name="loan_type"/>
+                                    </span>
+                                </div>
+                                <div class="mt-2">
+                                    <strong>Amount: </strong>
+                                    <field name="loan_amount" widget="monetary"/>
+                                </div>
+                                <div>
+                                    <strong>Remaining: </strong>
+                                    <field name="total_remaining" widget="monetary"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════
+         Action
+    ══════════════════════════════════════════════ -->
+    <record id="action_hr_loan" model="ir.actions.act_window">
+        <field name="name">Loan Requests</field>
+        <field name="res_model">hr.loan</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="view_hr_loan_search"/>
+        <field name="context">{'search_default_filter_my_loans': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Loan Request!
+            </p>
+            <p>
+                Submit a loan or advance salary request. Your HR and Finance teams
+                will review and approve it.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_hr_loan_all" model="ir.actions.act_window">
+        <field name="name">All Loan Requests</field>
+        <field name="res_model">hr.loan</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="view_hr_loan_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No loan requests found.</p>
+        </field>
+    </record>
+</odoo>

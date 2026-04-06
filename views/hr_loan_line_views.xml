@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Loan Line Tree (standalone) -->
+    <record id="view_hr_loan_line_tree" model="ir.ui.view">
+        <field name="name">hr.loan.line.tree</field>
+        <field name="model">hr.loan.line</field>
+        <field name="arch" type="xml">
+            <tree string="Repayment Lines"
+                decoration-success="paid == True"
+                decoration-danger="paid == False and date &lt; current_date">
+                <field name="loan_id"/>
+                <field name="employee_id"/>
+                <field name="date"/>
+                <field name="amount"/>
+                <field name="paid" widget="boolean_toggle"/>
+                <field name="paid_date"/>
+                <field name="payslip_id"/>
+                <field name="note"/>
+                <field name="currency_id" column_invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_hr_loan_line_search" model="ir.ui.view">
+        <field name="name">hr.loan.line.search</field>
+        <field name="model">hr.loan.line</field>
+        <field name="arch" type="xml">
+            <search string="Search Installments">
+                <field name="loan_id"/>
+                <field name="employee_id"/>
+                <filter name="filter_unpaid" string="Unpaid" domain="[('paid','=',False)]"/>
+                <filter name="filter_paid" string="Paid" domain="[('paid','=',True)]"/>
+                <filter name="filter_overdue" string="Overdue"
+                    domain="[('paid','=',False),('date','&lt;',context_today().strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_employee" string="Employee" context="{'group_by':'employee_id'}"/>
+                    <filter name="group_loan" string="Loan" context="{'group_by':'loan_id'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by':'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hr_loan_line" model="ir.actions.act_window">
+        <field name="name">Repayment Schedule</field>
+        <field name="res_model">hr.loan.line</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="view_hr_loan_line_search"/>
+    </record>
+</odoo>

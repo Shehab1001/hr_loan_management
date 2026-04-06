@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ── Root Menu ── -->
+    <menuitem id="menu_hr_loan_root"
+        name="Loan Management"
+        web_icon="hr_loan_management,static/description/icon.png"
+        sequence="95"/>
+
+    <!-- ── Employee Menu ── -->
+    <menuitem id="menu_hr_loan_employee"
+        name="My Loans"
+        parent="menu_hr_loan_root"
+        action="action_hr_loan"
+        sequence="10"
+        groups="hr_loan_management.group_hr_loan_user"/>
+
+    <!-- ── HR / Manager Menu ── -->
+    <menuitem id="menu_hr_loan_manager_root"
+        name="Management"
+        parent="menu_hr_loan_root"
+        sequence="20"
+        groups="hr_loan_management.group_hr_loan_manager"/>
+
+    <menuitem id="menu_hr_loan_all"
+        name="All Loan Requests"
+        parent="menu_hr_loan_manager_root"
+        action="action_hr_loan_all"
+        sequence="10"
+        groups="hr_loan_management.group_hr_loan_manager"/>
+
+    <menuitem id="menu_hr_loan_lines"
+        name="Repayment Schedule"
+        parent="menu_hr_loan_manager_root"
+        action="action_hr_loan_line"
+        sequence="20"
+        groups="hr_loan_management.group_hr_loan_manager"/>
+
+    <!-- Also surface under Employees app -->
+    <menuitem id="menu_hr_loan_under_employees"
+        name="Loan Requests"
+        parent="hr.menu_hr_root"
+        action="action_hr_loan_all"
+        sequence="99"
+        groups="hr_loan_management.group_hr_loan_manager"/>
+</odoo>
