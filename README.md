@@ -1,68 +1,55 @@
-# HR Loan & Advance Salary Management — Odoo 17
+# HR Loan & Advance Salary Management — Odoo 17 Community Edition
 
 ![Odoo Version](https://img.shields.io/badge/Odoo-17.0-blue)
 ![License](https://img.shields.io/badge/License-LGPL--3-green)
-![Category](https://img.shields.io/badge/Category-HR%2FPayroll-orange)
-
-A production-ready Odoo 17 module that solves the real business problem of managing **employee loans and advance salary requests** with a full multi-level approval workflow and **automatic payroll deduction** integration.
+![Edition](https://img.shields.io/badge/Edition-Community-orange)
+![Dependencies](https://img.shields.io/badge/Depends-base%20%7C%20hr%20%7C%20account%20%7C%20mail-lightgrey)
 
 ---
 
 ## Table of Contents
 
-- [Business Problem Solved](#business-problem-solved)
+- [What Problem Does This Solve?](#what-problem-does-this-solve)
 - [Features](#features)
 - [Module Structure](#module-structure)
+- [Dependencies](#dependencies)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage Guide](#usage-guide)
-- [Payroll Integration](#payroll-integration)
-- [Security & Access Roles](#security--access-roles)
+- [Accounting Integration](#accounting-integration)
+- [Security & Roles](#security--roles)
 - [Technical Reference](#technical-reference)
 - [Changelog](#changelog)
-- [Author](#author)
 
 ---
 
-## Business Problem Solved
+## What Problem Does This Solve?
 
-Most companies struggle with:
-- No formal loan request process — handled by email or paper
-- Manual tracking of repayments in spreadsheets
-- Payroll team not notified of deductions → missed or double deductions
-- No approval trail or audit history
-- No visibility into employee outstanding balances
+Companies manage employee loans through email and spreadsheets — no audit trail, missed deductions, and finance errors every month. This module provides:
 
-This module solves all of the above by providing a structured, auditable, and automated process inside Odoo.
+- A **structured digital request & approval workflow**
+- **Automatic repayment schedule** generation
+- **Accounting journal entries** automatically on disbursal and repayment (via `account` module — no payroll required)
+- **Full audit trail** through Odoo's chatter
 
 ---
 
 ## Features
 
-### Core
-- **Two request types**: Employee Loan & Advance Salary
-- **Multi-level approval workflow**: Employee → HR Manager → Finance/Admin
-- **Automatic repayment schedule** generation on disbursement
-- **Automatic payroll deduction** via salary rule integration (`LOAN_DED`)
-- **Loan refusal wizard** with mandatory reason
-- **Printable PDF** loan agreement with repayment schedule and signature block
-
-### Tracking & Visibility
-- Real-time repayment progress (paid / remaining)
-- Overdue installment highlighting in the UI
-- Chatter logs every status change with timestamps and user info
-- Full audit trail via `mail.thread`
-
-### Views
-- **Tree view** with color-coded status rows
-- **Kanban view** grouped by status
-- **Form view** with dynamic buttons based on user role and state
-- **Search view** with filters (My Loans, Active, Overdue, by Type)
-
-### Security
-- Three role levels: Employee, HR Manager, Finance
-- Record rules: employees see only their own loans
-- Multi-company support
+| Feature | Detail |
+|---|---|
+| Request Types | Employee Loan & Advance Salary |
+| Approval Levels | Employee → HR Manager → Finance (3 levels) |
+| Repayment Schedule | Auto-generated monthly installments on disbursal |
+| Accounting | Journal entries on disbursal & each repayment via `account.move` |
+| Payment Registration | Wizard with installment selection + method (Bank/Cash/Cheque) |
+| Payment Reversal | Reverse posted payments with automatic journal reversal |
+| PDF Report | Printable loan agreement with schedule & 3-signature block |
+| Loan Config | Per-company accounting setup (journal + 3 accounts) |
+| Security | 3 roles + record-level rules (employees see only own loans) |
+| Multi-company | Full support |
+| Audit Trail | `mail.thread` chatter on every state change |
+| Auto-close | Loan automatically closes when fully repaid |
 
 ---
 
@@ -72,69 +59,87 @@ This module solves all of the above by providing a structured, auditable, and au
 hr_loan_management/
 ├── __init__.py
 ├── __manifest__.py
+│
 ├── models/
 │   ├── __init__.py
-│   ├── hr_loan.py            # Main loan model + workflow
-│   ├── hr_loan_line.py       # Repayment schedule lines
-│   └── hr_payslip.py         # Payslip & salary rule integration
+│   ├── hr_loan_config.py       # Per-company accounting configuration
+│   ├── hr_loan.py              # Main loan model + workflow + journal entry
+│   ├── hr_loan_line.py         # Repayment schedule lines
+│   └── hr_loan_payment.py      # Payment records + account.move integration
+│
 ├── wizard/
 │   ├── __init__.py
-│   ├── hr_loan_refuse_wizard.py
-│   └── hr_loan_refuse_wizard_views.xml
+│   ├── hr_loan_refuse_wizard.py            # Refusal with mandatory reason
+│   ├── hr_loan_refuse_wizard_views.xml
+│   ├── hr_loan_payment_wizard.py           # Register repayment wizard
+│   └── hr_loan_payment_wizard_views.xml
+│
 ├── views/
-│   ├── hr_loan_views.xml     # Form, Tree, Kanban, Search
-│   ├── hr_loan_line_views.xml
-│   └── hr_loan_menu.xml
+│   ├── hr_loan_config_views.xml   # Accounting setup form
+│   ├── hr_loan_views.xml          # Loan form/tree/kanban/search
+│   ├── hr_loan_line_views.xml     # Installment tree
+│   ├── hr_loan_payment_views.xml  # Payment form/tree
+│   └── hr_loan_menu.xml           # All menus
+│
 ├── report/
 │   ├── hr_loan_report.xml
 │   └── hr_loan_report_template.xml
+│
 ├── security/
 │   ├── hr_loan_security.xml
 │   └── ir.model.access.csv
+│
 ├── data/
-│   ├── hr_loan_sequence.xml  # LOAN/YYYY/XXXXX sequence
-│   └── hr_loan_salary_rule.xml
-└── static/
-    └── description/
-        └── icon.png
+│   ├── hr_loan_sequence.xml       # LOAN/YYYY/XXXXX & LPAY/YYYY/XXXXX
+│   └── hr_loan_data.xml
+│
+└── static/description/
+    └── icon.png
 ```
+
+---
+
+## Dependencies
+
+```python
+'depends': ['base', 'hr', 'account', 'mail']
+```
+
+**No `hr_payroll`. No Enterprise modules.** Installs on any Odoo 17 Community instance.
 
 ---
 
 ## Installation
 
-### Requirements
+### 1. Copy the module
 
-| Dependency | Version |
-|---|---|
-| Odoo | 17.0 |
-| Python | 3.10+ |
-| `hr` | Bundled with Odoo |
-| `hr_payroll` | Bundled with Odoo Enterprise or Community |
-| `mail` | Bundled with Odoo |
-| `account` | Bundled with Odoo |
+```bash
+cp -r hr_loan_management /path/to/your/odoo/custom_addons/
+```
 
-### Steps
+### 2. Ensure your `odoo.conf` includes the path
 
-1. **Copy the module** into your Odoo addons directory:
-   ```bash
-   cp -r hr_loan_management /path/to/odoo/addons/
-   ```
+```ini
+addons_path = /opt/odoo/addons,/opt/odoo/custom_addons
+```
 
-2. **Restart the Odoo server**:
-   ```bash
-   sudo systemctl restart odoo
-   # or
-   python odoo-bin --config=/etc/odoo/odoo.conf
-   ```
+### 3. Restart Odoo
 
-3. **Activate Developer Mode** in Odoo:
-   `Settings → General Settings → Developer Tools → Activate the developer mode`
+```bash
+sudo systemctl restart odoo
+# or
+python odoo-bin -c /etc/odoo/odoo.conf
+```
 
-4. **Update the apps list**:
-   `Apps → Update Apps List`
+### 4. Update Apps List
 
-5. **Search for and install** `HR Loan & Advance Salary Management`
+In Odoo: **Apps → Update Apps List**
+
+### 5. Install
+
+Search for **"HR Loan"** → Click **Install**
+
+> ✅ Required modules (`base`, `hr`, `account`, `mail`) are all standard Odoo Community modules.
 
 ---
 
@@ -142,126 +147,108 @@ hr_loan_management/
 
 ### Step 1 — Assign User Roles
 
-Go to `Settings → Users` and assign the appropriate group to each user:
+Go to **Settings → Users** and assign each user the appropriate group:
 
-| Group | Who Gets It |
+| Group | Who Gets It | Access |
+|---|---|---|
+| Employee (Loan Requester) | All staff | Create & view own loans |
+| HR Manager | HR officers | Approve step 1, view all, refuse |
+| Finance (Loan Disburser) | Finance / CFO | Final approval, disburse, payments |
+
+### Step 2 — Configure Accounting (REQUIRED before first disbursal)
+
+Go to **Loan Management → Configuration → Accounting Setup** and create a record:
+
+| Field | What to Set |
 |---|---|
-| Employee (Loan Requester) | All employees who can submit requests |
-| HR Manager | HR officers who approve at step 1 |
-| Finance (Loan Disburser) | Finance team / admin who gives final approval |
+| **Loan Journal** | A bank, cash, or miscellaneous journal |
+| **Loan Receivable Account** | e.g. `1410 – Employee Loans Receivable` |
+| **Disbursal / Source Account** | e.g. `1010 – Bank Account` |
+| **Repayment Account** | e.g. `1010 – Bank Account` (or a clearing account) |
+| **Max Loan Amount** | Ceiling per request (informational) |
+| **Max Installments** | Max months allowed (informational) |
 
-### Step 2 — Add the Salary Rule to Your Payroll Structure
-
-1. Go to `Payroll → Configuration → Salary Structures`
-2. Open your active structure (e.g., **Employee** or **Basic**)
-3. Go to the **Salary Rules** tab
-4. Click **Add a line** and search for `Loan Deduction` (code: `LOAN_DED`)
-5. Save
-
-This single step enables fully automatic deductions when payslips are confirmed.
-
-### Step 3 — (Optional) Multi-Company Setup
-
-The loan sequence and rules are shared across companies by default. If you need per-company sequences, go to `Settings → Technical → Sequences` and create a company-specific override for the `hr.loan` sequence.
+> **Without this configuration, disbursal will fail with a clear error message.**
 
 ---
 
 ## Usage Guide
 
-### For Employees
+### Employee — Submit a Loan Request
 
-1. Go to **Loan Management → My Loans**
-2. Click **New**
-3. Fill in:
-   - **Type**: Loan or Advance Salary
-   - **Employee**: Yourself (or select if HR is creating on behalf)
-   - **Loan Amount** and **Number of Installments**
-   - **First Deduction Date**: the month you want deductions to start
-   - **Notes**: purpose/reason for the loan
-4. Click **Submit for Approval**
+1. Go to **Loan Management → My Loans → New**
+2. Choose **Type**: Employee Loan or Advance Salary
+3. Fill in Amount, Number of Installments, First Repayment Date
+4. Add a Note explaining the purpose
+5. Click **Submit for Approval**
 
-### For HR Managers
+### HR Manager — Approve (Step 1)
 
 1. Go to **Loan Management → Management → All Loan Requests**
-2. Filter by `Waiting Approval`
-3. Open the request, review it, and click **Approve (HR)**
-4. Or click **Refuse** and enter a mandatory reason
+2. Filter by **Waiting Approval**
+3. Open the request → Click **Approve (HR)** or **Refuse** (with reason)
 
-### For Finance Team
+### Finance — Disburse (Step 2)
 
-1. After HR approval, requests appear in `HR Approved` state
-2. Open the request, verify the amount, and click **Approve & Disburse**
-3. The system automatically generates the full monthly repayment schedule
+1. Open any **HR Approved** loan
+2. Click **Approve & Disburse**
+3. System automatically:
+   - Creates a journal entry (DR Loan Receivable / CR Bank)
+   - Generates the full monthly repayment schedule
+4. Click **Print Agreement** to generate the signed PDF
 
-### Viewing Repayment Progress
+### Finance — Register a Repayment
 
-- Open any active loan
-- The **Installments** smart button shows `paid / total` count
-- The **Repayment Schedule** tab shows each line color-coded:
-  - 🟢 Green = Paid
-  - 🔴 Red = Overdue (past due date, not paid)
-  - ⚪ Normal = Upcoming
+1. Open the active loan → Click **Register Repayment**
+2. Set payment date, amount, method
+3. Select which installment(s) this covers
+4. Click **Register & Post Payment**
+5. System creates: journal entry (DR Bank / CR Loan Receivable), marks installment paid
 
-### Printing a Loan Agreement
+### Auto-Close
 
-- From any non-draft loan, click **Print** in the header
-- A PDF is generated with full details, repayment schedule, and signature block
+When all installments are paid, the loan automatically moves to **Closed** state.
 
 ---
 
-## Payroll Integration
+## Accounting Integration
 
-This module integrates with `hr_payroll` at two levels:
+This module integrates with the standard `account` module (Community Edition):
 
-### Level 1 — Salary Rule (Automatic Deduction)
+### On Disbursal
 
-The `LOAN_DED` salary rule runs Python code inside the payslip to:
-1. Find all **unpaid** installment lines for the employee within the payslip's date range
-2. Sum the amounts
-3. Apply as a **negative deduction** on the payslip
-
-```python
-# Inside the salary rule (amount_python_compute):
-loan_lines = env['hr.loan.line'].search([
-    ('employee_id', '=', employee.id),
-    ('paid', '=', False),
-    ('date', '>=', payslip.date_from),
-    ('date', '<=', payslip.date_to),
-    ('loan_id.state', '=', 'validate'),
-])
-result = -sum(loan_lines.mapped('amount'))
+```
+DR  Loan Receivable Account    [loan_amount]
+CR  Disbursal / Source Account [loan_amount]
 ```
 
-### Level 2 — Payslip Confirm Hook
+### On Each Repayment
 
-When a payslip is set to **Done**, the `action_payslip_done` override automatically:
-1. Finds all due loan lines for the employee in that period
-2. Marks them as **Paid**
-3. Links the `payslip_id` to each line for full traceability
+```
+DR  Repayment Account (Bank/Cash) [payment_amount]
+CR  Loan Receivable Account        [payment_amount]
+```
 
-This means finance can always trace which payslip covered which installment.
+### Payment Reversal
 
-### Payslip View Enhancement
-
-The payslip form shows:
-- `Loan Deductions` smart button with count
-- `Total Loan Deduction` field
-- Button to open the deduction lines list
+If a payment is reversed, `account.move._reverse_moves()` is called automatically — the journal entry is reversed and the installment is marked unpaid.
 
 ---
 
-## Security & Access Roles
+## Security & Roles
 
-| Action | Employee | HR Manager | Finance |
+| Permission | Employee | HR Manager | Finance |
 |---|:---:|:---:|:---:|
 | Create loan request | ✅ | ✅ | ✅ |
-| View own loans | ✅ | ✅ | ✅ |
+| View own loans only | ✅ | — | — |
 | View all company loans | ❌ | ✅ | ✅ |
-| Approve (HR step) | ❌ | ✅ | ✅ |
+| Approve — HR step | ❌ | ✅ | ✅ |
 | Approve & Disburse | ❌ | ❌ | ✅ |
 | Refuse loan | ❌ | ✅ | ✅ |
-| Delete loan | ❌ | ❌ | ✅ |
-| Mark installment paid/unpaid | ❌ | ✅ | ✅ |
+| Register payment | ❌ | ❌ | ✅ |
+| Reverse payment | ❌ | ❌ | ✅ |
+| Configure accounting | ❌ | ❌ | ✅ |
+| Delete records | ❌ | ❌ | ✅ |
 
 ---
 
@@ -269,68 +256,55 @@ The payslip form shows:
 
 ### Models
 
-#### `hr.loan`
-| Field | Type | Description |
-|---|---|---|
-| `name` | Char | Auto-generated sequence (LOAN/YYYY/XXXXX) |
-| `loan_type` | Selection | `loan` or `advance` |
-| `employee_id` | Many2one | hr.employee |
-| `loan_amount` | Monetary | Total loan amount |
-| `installment` | Integer | Number of monthly installments |
-| `installment_amount` | Monetary | Computed: loan_amount / installment |
-| `payment_date` | Date | First deduction date |
-| `state` | Selection | draft → confirm → validate1 → validate |
-| `loan_lines` | One2many | hr.loan.line repayment schedule |
-| `total_paid` | Monetary | Sum of paid lines |
-| `total_remaining` | Monetary | loan_amount − total_paid |
+| Model | Purpose |
+|---|---|
+| `hr.loan` | Main loan record. Workflow, schedule generation, journal entry on disbursal |
+| `hr.loan.line` | Installment lines. One per month. Tracks paid/unpaid + linked payment |
+| `hr.loan.payment` | Payment records. Creates `account.move` on posting |
+| `hr.loan.config` | Per-company accounting config (journal + accounts) |
+| `hr.loan.refuse.wizard` | Transient model for refusal with mandatory reason |
+| `hr.loan.payment.wizard` | Transient model for registering repayments |
 
-#### `hr.loan.line`
-| Field | Type | Description |
-|---|---|---|
-| `loan_id` | Many2one | Parent loan |
-| `date` | Date | Scheduled deduction date |
-| `amount` | Monetary | Installment amount |
-| `paid` | Boolean | Whether this line has been deducted |
-| `paid_date` | Date | Date marked as paid |
-| `payslip_id` | Many2one | Linked payslip (if auto-deducted) |
-
-### Workflow States
+### Loan State Machine
 
 ```
-draft → confirm → validate1 → validate
-                ↘ refuse
-draft ← cancel ←┘ (reset to draft)
+draft ──► confirm ──► validate1 ──► validate ──► close
+                  └──► refuse      └──► refuse
+draft ◄── cancel ◄──┘
+draft ◄── (reset) ◄── refuse / cancel
 ```
 
-### Sequence Format
-`LOAN/2025/00001`, `LOAN/2025/00002`, resets each year.
+### Sequences
+
+| Code | Format | Example |
+|---|---|---|
+| `hr.loan` | `LOAN/YYYY/NNNNN` | `LOAN/2025/00001` |
+| `hr.loan.payment` | `LPAY/YYYY/NNNNN` | `LPAY/2025/00001` |
 
 ---
 
 ## Changelog
 
-### v17.0.1.0.0 (Initial Release)
-- Employee Loan and Advance Salary request management
-- Multi-level approval workflow (Employee → HR → Finance)
-- Automatic repayment schedule generation
-- Payroll integration with `LOAN_DED` salary rule
-- Payslip confirmation hook for automatic marking
-- Printable QWeb PDF report
-- Role-based security (3 groups + record rules)
-- Multi-company support
+### v17.0.2.0.0 — Community Edition Refactor
+
+- **Removed** `hr_payroll` dependency entirely
+- **Added** `hr.loan.config` model for per-company accounting setup
+- **Added** `hr.loan.payment` model replacing payslip hook
+- **Added** payment registration wizard with installment selector
+- **Added** journal entry creation on disbursal via `account.move`
+- **Added** journal entry creation on each repayment
+- **Added** payment reversal with automatic journal reversal
+- **Added** auto-close when loan is fully repaid
+- **Added** payment smart button on loan form
+- Installments now link to `hr.loan.payment` instead of `hr.payslip`
 
 ---
 
 ## Author
 
-**Shehab Eldin Saeed Zakaria**
-Odoo Developer | Backend Developer
-- GitHub: [github.com/Shehab1001](https://github.com/Shehab1001)
-- LinkedIn: [linkedin.com/in/shehab1001](https://www.linkedin.com/in/shehab1001/)
-- Email: dev.shehabsaid@gmail.com
+**Shehab Eldin Saeed Zakaria** — Odoo Developer  
+📧 dev.shehabsaid@gmail.com  
+🔗 [linkedin.com/in/shehab1001](https://www.linkedin.com/in/shehab1001/)  
+💻 [github.com/Shehab1001](https://github.com/Shehab1001)
 
----
-
-## License
-
-This module is licensed under [LGPL-3](https://www.gnu.org/licenses/lgpl-3.0.en.html).
+**License:** LGPL-3

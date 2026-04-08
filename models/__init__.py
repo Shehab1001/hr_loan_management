@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from . import hr_loan_config
 from . import hr_loan
 from . import hr_loan_line
-from . import hr_payslip
+from . import hr_loan_payment

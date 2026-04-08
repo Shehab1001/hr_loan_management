@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="action_report_hr_loan" model="ir.actions.report">
-        <field name="name">Loan Agreement / Advance Request</field>
+        <field name="name">Loan Agreement</field>
         <field name="model">hr.loan</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">hr_loan_management.report_hr_loan_template</field>

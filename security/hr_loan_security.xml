@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- ── Category ── -->
         <record id="module_category_hr_loan" model="ir.module.category">
             <field name="name">HR Loan Management</field>
-            <field name="description">Manage employee loans and advance salary</field>
             <field name="sequence">15</field>
         </record>
 
-        <!-- ── Groups ── -->
         <record id="group_hr_loan_user" model="res.groups">
             <field name="name">Employee (Loan Requester)</field>
             <field name="category_id" ref="module_category_hr_loan"/>
@@ -19,7 +16,6 @@
             <field name="name">HR Manager</field>
             <field name="category_id" ref="module_category_hr_loan"/>
             <field name="implied_ids" eval="[(4, ref('group_hr_loan_user'))]"/>
-            <field name="comment">Can approve, refuse, and manage all loan requests.</field>
             <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
         </record>
 
@@ -27,13 +23,11 @@
             <field name="name">Finance (Loan Disburser)</field>
             <field name="category_id" ref="module_category_hr_loan"/>
             <field name="implied_ids" eval="[(4, ref('group_hr_loan_manager'))]"/>
-            <field name="comment">Can give final approval and disburse loans.</field>
             <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
         </record>
 
-        <!-- ── Record Rules ── -->
-        <!-- Employees can only see their own loans -->
-        <record id="hr_loan_rule_employee" model="ir.rule">
+        <!-- Employees see only their own loans -->
+        <record id="hr_loan_rule_own" model="ir.rule">
             <field name="name">Employees: Own Loans Only</field>
             <field name="model_id" ref="model_hr_loan"/>
             <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
@@ -44,9 +38,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- HR managers see all loans in their company -->
-        <record id="hr_loan_rule_manager" model="ir.rule">
-            <field name="name">HR Managers: All Company Loans</field>
+        <!-- HR / Finance see all company loans -->
+        <record id="hr_loan_rule_company" model="ir.rule">
+            <field name="name">HR/Finance: All Company Loans</field>
             <field name="model_id" ref="model_hr_loan"/>
             <field name="domain_force">[('company_id', 'in', company_ids)]</field>
             <field name="groups" eval="[(4, ref('group_hr_loan_manager'))]"/>

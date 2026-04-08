@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hr_loan_payment_wizard_form" model="ir.ui.view">
+        <field name="name">hr.loan.payment.wizard.form</field>
+        <field name="model">hr.loan.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Register Loan Repayment">
+                <group>
+                    <group string="Loan Info">
+                        <field name="loan_id" readonly="1"/>
+                        <field name="employee_id"/>
+                        <field name="total_remaining"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                    <group string="Payment Details">
+                        <field name="payment_date"/>
+                        <field name="amount"/>
+                        <field name="payment_method"/>
+                    </group>
+                </group>
+                <group string="Apply to Installments">
+                    <field name="loan_line_ids" nolabel="1">
+                        <tree>
+                            <field name="date"/>
+                            <field name="amount"/>
+                            <field name="note"/>
+                        </tree>
+                    </field>
+                </group>
+                <group string="Notes">
+                    <field name="note" nolabel="1"
+                        placeholder="Optional notes about this payment..."/>
+                </group>
+                <footer>
+                    <button name="action_register" type="object"
+                        string="Register &amp; Post Payment" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
