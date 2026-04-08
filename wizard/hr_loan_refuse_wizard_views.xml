@@ -7,7 +7,8 @@
             <form string="Refuse Loan Request">
                 <group>
                     <field name="loan_id" readonly="1"/>
-                    <field name="refuse_reason" placeholder="Please provide a reason for refusing this loan request..."/>
+                    <field name="refuse_reason"
+                        placeholder="Please provide a clear reason for refusing this loan request..."/>
                 </group>
                 <footer>
                     <button name="action_refuse" type="object"

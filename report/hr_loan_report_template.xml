@@ -5,61 +5,45 @@
             <t t-foreach="docs" t-as="doc">
                 <t t-call="web.external_layout">
                     <div class="page">
-                        <!-- Header -->
-                        <div class="row mt-4 mb-4">
-                            <div class="col-12 text-center">
-                                <h2>
+
+                        <!-- Title -->
+                        <div class="row mb-4 text-center">
+                            <div class="col-12">
+                                <h2 style="color:#1F5C8B;">
                                     <t t-if="doc.loan_type == 'loan'">Employee Loan Agreement</t>
-                                    <t t-else="">Advance Salary Request</t>
+                                    <t t-else="">Advance Salary Agreement</t>
                                 </h2>
-                                <h4 class="text-muted">
-                                    <t t-esc="doc.name"/>
-                                </h4>
+                                <h5 class="text-muted"><t t-esc="doc.name"/></h5>
                             </div>
                         </div>
+                        <hr style="border-color:#1F5C8B; border-width:2px;"/>
 
-                        <hr/>
-
-                        <!-- Employee & Loan Details -->
+                        <!-- Employee & Loan Info -->
                         <div class="row mb-4">
                             <div class="col-6">
+                                <h6 style="color:#714B67; border-bottom:1px solid #ccc; padding-bottom:4px;">
+                                    Employee Details
+                                </h6>
                                 <table class="table table-sm table-borderless">
-                                    <tr>
-                                        <td><strong>Employee:</strong></td>
-                                        <td><t t-esc="doc.employee_id.name"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Department:</strong></td>
-                                        <td><t t-esc="doc.department_id.name or '—'"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Job Position:</strong></td>
-                                        <td><t t-esc="doc.job_id.name or '—'"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Company:</strong></td>
-                                        <td><t t-esc="doc.company_id.name"/></td>
-                                    </tr>
+                                    <tr><td><b>Name:</b></td><td><t t-esc="doc.employee_id.name"/></td></tr>
+                                    <tr><td><b>Department:</b></td><td><t t-esc="doc.department_id.name or '—'"/></td></tr>
+                                    <tr><td><b>Job Title:</b></td><td><t t-esc="doc.job_id.name or '—'"/></td></tr>
+                                    <tr><td><b>Company:</b></td><td><t t-esc="doc.company_id.name"/></td></tr>
                                 </table>
                             </div>
                             <div class="col-6">
+                                <h6 style="color:#714B67; border-bottom:1px solid #ccc; padding-bottom:4px;">
+                                    Loan Details
+                                </h6>
                                 <table class="table table-sm table-borderless">
+                                    <tr><td><b>Reference:</b></td><td><t t-esc="doc.name"/></td></tr>
+                                    <tr><td><b>Request Date:</b></td><td><t t-esc="doc.date_request"/></td></tr>
+                                    <tr><td><b>Approval Date:</b></td><td><t t-esc="doc.date_approved or '—'"/></td></tr>
+                                    <tr><td><b>Disbursal Date:</b></td><td><t t-esc="doc.date_disbursed or '—'"/></td></tr>
                                     <tr>
-                                        <td><strong>Reference:</strong></td>
-                                        <td><t t-esc="doc.name"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Request Date:</strong></td>
-                                        <td><t t-esc="doc.date_request"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Approval Date:</strong></td>
-                                        <td><t t-esc="doc.date_approved or '—'"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Status:</strong></td>
+                                        <td><b>Status:</b></td>
                                         <td>
-                                            <span t-attf-class="badge #{doc.state == 'validate' and 'bg-success' or doc.state == 'refuse' and 'bg-danger' or 'bg-warning'}">
+                                            <span t-attf-style="background:#{doc.state == 'validate' and '#28a745' or doc.state == 'close' and '#17a2b8' or doc.state == 'refuse' and '#dc3545' or '#ffc107'}; color:white; padding:2px 8px; border-radius:4px; font-size:11px;">
                                                 <t t-esc="dict(doc._fields['state'].selection)[doc.state]"/>
                                             </span>
                                         </td>
@@ -69,108 +53,106 @@
                         </div>
 
                         <!-- Financial Summary -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="border-bottom pb-1">Financial Summary</h5>
-                                <table class="table table-sm table-bordered">
-                                    <tr class="table-primary">
-                                        <th>Loan Amount</th>
-                                        <th>No. of Installments</th>
-                                        <th>Monthly Installment</th>
-                                        <th>Total Paid</th>
-                                        <th>Remaining Balance</th>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <t t-esc="doc.currency_id.symbol"/>
-                                            <t t-esc="'{:,.2f}'.format(doc.loan_amount)"/>
-                                        </td>
-                                        <td><t t-esc="doc.installment"/></td>
-                                        <td>
-                                            <t t-esc="doc.currency_id.symbol"/>
-                                            <t t-esc="'{:,.2f}'.format(doc.installment_amount)"/>
-                                        </td>
-                                        <td>
-                                            <t t-esc="doc.currency_id.symbol"/>
-                                            <t t-esc="'{:,.2f}'.format(doc.total_paid)"/>
-                                        </td>
-                                        <td>
-                                            <t t-esc="doc.currency_id.symbol"/>
-                                            <t t-esc="'{:,.2f}'.format(doc.total_remaining)"/>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
+                        <h6 style="color:#714B67; border-bottom:1px solid #ccc; padding-bottom:4px;">
+                            Financial Summary
+                        </h6>
+                        <table class="table table-sm table-bordered mb-4">
+                            <thead style="background:#2C3E50; color:white;">
+                                <tr>
+                                    <th>Loan Amount</th>
+                                    <th>No. of Installments</th>
+                                    <th>Monthly Installment</th>
+                                    <th>Total Paid</th>
+                                    <th>Remaining Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><t t-esc="doc.currency_id.symbol"/> <t t-esc="'{:,.2f}'.format(doc.loan_amount)"/></td>
+                                    <td><t t-esc="doc.installment"/></td>
+                                    <td><t t-esc="doc.currency_id.symbol"/> <t t-esc="'{:,.2f}'.format(doc.installment_amount)"/></td>
+                                    <td><t t-esc="doc.currency_id.symbol"/> <t t-esc="'{:,.2f}'.format(doc.total_paid)"/></td>
+                                    <td><b><t t-esc="doc.currency_id.symbol"/> <t t-esc="'{:,.2f}'.format(doc.total_remaining)"/></b></td>
+                                </tr>
+                            </tbody>
+                        </table>
 
                         <!-- Repayment Schedule -->
                         <t t-if="doc.loan_lines">
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h5 class="border-bottom pb-1">Repayment Schedule</h5>
-                                    <table class="table table-sm table-striped table-bordered">
-                                        <thead class="table-dark">
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Due Date</th>
-                                                <th>Amount</th>
-                                                <th>Paid On</th>
-                                                <th>Via Payslip</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <t t-foreach="doc.loan_lines" t-as="line">
-                                                <tr t-attf-class="#{line.paid and 'table-success' or ''}">
-                                                    <td><t t-esc="line_index + 1"/></td>
-                                                    <td><t t-esc="line.date"/></td>
-                                                    <td>
-                                                        <t t-esc="doc.currency_id.symbol"/>
-                                                        <t t-esc="'{:,.2f}'.format(line.amount)"/>
-                                                    </td>
-                                                    <td><t t-esc="line.paid_date or '—'"/></td>
-                                                    <td><t t-esc="line.payslip_id.name or '—'"/></td>
-                                                    <td>
-                                                        <t t-if="line.paid">
-                                                            <span class="badge bg-success">Paid</span>
-                                                        </t>
-                                                        <t t-else="">
-                                                            <span class="badge bg-warning">Pending</span>
-                                                        </t>
-                                                    </td>
-                                                </tr>
-                                            </t>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            <h6 style="color:#714B67; border-bottom:1px solid #ccc; padding-bottom:4px;">
+                                Repayment Schedule
+                            </h6>
+                            <table class="table table-sm table-striped table-bordered mb-4">
+                                <thead style="background:#2C3E50; color:white;">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Due Date</th>
+                                        <th>Amount</th>
+                                        <th>Paid On</th>
+                                        <th>Payment Ref</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc.loan_lines" t-as="line">
+                                        <tr t-attf-style="#{line.paid and 'background:#d4edda;' or ''}">
+                                            <td><t t-esc="line_index + 1"/></td>
+                                            <td><t t-esc="line.date"/></td>
+                                            <td>
+                                                <t t-esc="doc.currency_id.symbol"/>
+                                                <t t-esc="'{:,.2f}'.format(line.amount)"/>
+                                            </td>
+                                            <td><t t-esc="line.paid_date or '—'"/></td>
+                                            <td><t t-esc="line.payment_id.name or '—'"/></td>
+                                            <td>
+                                                <t t-if="line.paid">
+                                                    <span style="color:#28a745; font-weight:bold;">&#10003; Paid</span>
+                                                </t>
+                                                <t t-else="">
+                                                    <span style="color:#ffc107; font-weight:bold;">Pending</span>
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
                         </t>
 
                         <!-- Notes -->
                         <t t-if="doc.notes">
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h5 class="border-bottom pb-1">Notes</h5>
-                                    <p><t t-esc="doc.notes"/></p>
-                                </div>
-                            </div>
+                            <h6 style="color:#714B67; border-bottom:1px solid #ccc; padding-bottom:4px;">Notes</h6>
+                            <p><t t-esc="doc.notes"/></p>
                         </t>
 
-                        <!-- Signature Block -->
+                        <!-- Terms -->
+                        <div class="mt-3 p-2" style="background:#f8f9fa; border-left:4px solid #1F5C8B; font-size:11px; color:#555;">
+                            <b>Terms &amp; Conditions:</b> The employee agrees to the above repayment schedule.
+                            Monthly deductions will be processed as agreed. Any early settlement must be
+                            communicated in writing to the Finance department.
+                        </div>
+
+                        <!-- Signatures -->
                         <div class="row mt-5">
                             <div class="col-4 text-center">
-                                <div class="border-top pt-2">Employee Signature</div>
-                                <p class="text-muted small"><t t-esc="doc.employee_id.name"/></p>
+                                <div style="border-top:1px solid #333; padding-top:6px;">
+                                    <b>Employee Signature</b><br/>
+                                    <small class="text-muted"><t t-esc="doc.employee_id.name"/></small>
+                                </div>
                             </div>
                             <div class="col-4 text-center">
-                                <div class="border-top pt-2">HR Manager</div>
-                                <p class="text-muted small"><t t-esc="doc.approved_by.name or '—'"/></p>
+                                <div style="border-top:1px solid #333; padding-top:6px;">
+                                    <b>HR Manager</b><br/>
+                                    <small class="text-muted"><t t-esc="doc.approved_by.name or '—'"/></small>
+                                </div>
                             </div>
                             <div class="col-4 text-center">
-                                <div class="border-top pt-2">Finance / Director</div>
-                                <p class="text-muted small">Authorized Signatory</p>
+                                <div style="border-top:1px solid #333; padding-top:6px;">
+                                    <b>Finance / Director</b><br/>
+                                    <small class="text-muted">Authorized Signatory</small>
+                                </div>
                             </div>
                         </div>
+
                     </div>
                 </t>
             </t>

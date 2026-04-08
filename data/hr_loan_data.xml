@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- No demo data that requires hr_payroll. -->
+    <!-- Loan config is created manually by the Finance user after install. -->
+</odoo>

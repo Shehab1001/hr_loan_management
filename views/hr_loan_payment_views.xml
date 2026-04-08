@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ══ Payment Form ══ -->
+    <record id="view_hr_loan_payment_form" model="ir.ui.view">
+        <field name="name">hr.loan.payment.form</field>
+        <field name="model">hr.loan.payment</field>
+        <field name="arch" type="xml">
+            <form string="Loan Repayment">
+                <header>
+                    <button name="action_post" type="object"
+                        string="Post Payment" class="oe_highlight"
+                        invisible="state != 'draft'"/>
+                    <button name="action_reverse" type="object"
+                        string="Reverse Payment"
+                        groups="hr_loan_management.group_hr_loan_finance"
+                        invisible="state != 'posted'"/>
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="draft,posted"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Payment Details">
+                            <field name="loan_id" readonly="state != 'draft'"/>
+                            <field name="employee_id"/>
+                            <field name="payment_date" readonly="state != 'draft'"/>
+                            <field name="payment_method" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Amount">
+                            <field name="amount" readonly="state != 'draft'"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="move_id" invisible="not move_id"/>
+                        </group>
+                    </group>
+                    <group string="Apply to Installments">
+                        <field name="loan_line_ids" widget="many2many_checkboxes"
+                            readonly="state != 'draft'"/>
+                    </group>
+                    <group string="Notes">
+                        <field name="note" nolabel="1"
+                            placeholder="Any notes about this repayment..."/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ Payment Tree ══ -->
+    <record id="view_hr_loan_payment_tree" model="ir.ui.view">
+        <field name="name">hr.loan.payment.tree</field>
+        <field name="model">hr.loan.payment</field>
+        <field name="arch" type="xml">
+            <tree string="Loan Payments"
+                decoration-success="state == 'posted'"
+                decoration-muted="state == 'reversed'">
+                <field name="name"/>
+                <field name="loan_id"/>
+                <field name="employee_id"/>
+                <field name="payment_date"/>
+                <field name="amount"/>
+                <field name="payment_method"/>
+                <field name="move_id"/>
+                <field name="state" widget="badge"
+                    decoration-success="state == 'posted'"
+                    decoration-warning="state == 'draft'"
+                    decoration-danger="state == 'reversed'"/>
+                <field name="currency_id" column_invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_hr_loan_payment" model="ir.actions.act_window">
+        <field name="name">Loan Payments</field>
+        <field name="res_model">hr.loan.payment</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>
