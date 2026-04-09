@@ -8,7 +8,7 @@
 
     <!-- Employee -->
     <menuitem id="menu_hr_loan_my"
-        name="My Loans"
+        name="MyLoans"
         parent="menu_hr_loan_root"
         action="action_hr_loan_my"
         sequence="10"
